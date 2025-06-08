@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(SVD_Image_Compressor)
+project(SVD-Image-Compressor)
 
 set(CMAKE_CXX_STANDARD 20)
 
