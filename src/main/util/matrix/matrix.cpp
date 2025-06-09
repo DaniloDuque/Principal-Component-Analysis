@@ -2,15 +2,16 @@
 #include <iostream>
 #include <iomanip>
 #include <cmath>
+#include <cassert>
 
-Matrix::Matrix(st rows, st cols, double init_val): m_rows(rows), m_cols(cols), m_data(rows * cols, init_val) {}
+Matrix::Matrix(const st rows, const st cols, const double init_val): m_rows(rows), m_cols(cols), m_data(rows * cols, init_val) {}
 
-Matrix::Matrix(st rows, st cols, vector init): m_rows(rows), m_cols(cols) {
+Matrix::Matrix(const st rows, const st cols, const vector& init): m_rows(rows), m_cols(cols) {
     assert(init.size() == m_rows * m_cols);
     m_data = init;
 }
 
-Matrix::Matrix(std::initializer_list<vector> init) {
+Matrix::Matrix(const std::initializer_list<vector> init) {
     m_rows = init.size();
     m_cols = init.begin()->size();
     m_data.reserve(m_rows * m_cols);
@@ -24,12 +25,14 @@ Matrix::Matrix(std::initializer_list<vector> init) {
 st Matrix::rows() const { return m_rows; }
 st Matrix::cols() const { return m_cols; }
 
-vector Matrix::row(st i) const {
+vector Matrix::row(const st i) const {
     assert(i < m_rows);
-    return {m_data.begin() + i * m_cols, m_data.begin() + (i + 1) * m_cols};
+    auto begin = m_data.begin() + static_cast<std::ptrdiff_t>(i * m_cols);
+    auto end = begin + static_cast<std::ptrdiff_t>(m_cols);
+    return {begin, end};
 }
 
-vector Matrix::col(st j) const {
+vector Matrix::col(const st j) const {
     assert(j < m_cols);
     vector result(m_rows);
     for (st i = 0; i < m_rows; ++i)
@@ -37,11 +40,11 @@ vector Matrix::col(st j) const {
     return result;
 }
 
-double& Matrix::operator()(st i, st j) {
+double& Matrix::operator()(const st i, const st j) {
     assert(i < m_rows && j < m_cols);
     return m_data[i * m_cols + j];
 }
-double Matrix::operator()(st i, st j) const {
+double Matrix::operator()(const st i, const st j) const {
     assert(i < m_rows && j < m_cols);
     return m_data[i * m_cols + j];
 }
@@ -63,7 +66,7 @@ Matrix Matrix::transpose() const {
 Matrix Matrix::operator*(const Matrix& other) const {
     assert(m_cols == other.m_rows);
     Matrix result(m_rows, other.m_cols);
-    Matrix other_transposed = other.transpose();
+    const Matrix other_transposed = other.transpose();
 
     for (st i = 0; i < m_rows; ++i) {
         vector row_i = row(i);
@@ -108,13 +111,13 @@ Matrix Matrix::operator-(const Matrix& other) const {
     return result;
 }
 
-Matrix Matrix::identity(st n) {
+Matrix Matrix::identity(const st n) {
     Matrix I(n, n);
     for (st i = 0; i < n; ++i) I(i, i) = 1.0;
     return I;
 }
 
-Matrix Matrix::zeros(st rows, st cols) {
+Matrix Matrix::zeros(const st rows, const st cols) {
     Matrix Z(rows, cols);
     return Z;
 }
@@ -125,7 +128,7 @@ double Matrix::frobenius_norm() const {
     return sqrt(sum);
 }
 
-void Matrix::print(st precision) const {
+void Matrix::print(const int precision) const {
     std::cout << std::fixed << std::setprecision(precision);
     for (st i = 0; i < m_rows; ++i) {
         for (st j = 0; j < m_cols; ++j)
@@ -134,12 +137,12 @@ void Matrix::print(st precision) const {
     }
 }
 
-void Matrix::resize(st new_rows, st new_cols, bool preserve) {
+void Matrix::resize(const st new_rows, const st new_cols, const bool preserve) {
     vector new_data(new_rows * new_cols, 0.0);
 
     if (preserve) {
-        st min_rows = std::min(new_rows, m_rows);
-        st min_cols = std::min(new_cols, m_cols);
+        const st min_rows = std::min(new_rows, m_rows);
+        const st min_cols = std::min(new_cols, m_cols);
         for (st i = 0; i < min_rows; ++i)
             for (st j = 0; j < min_cols; ++j)
                 new_data[i * new_cols + j] = (*this)(i, j);
@@ -150,12 +153,11 @@ void Matrix::resize(st new_rows, st new_cols, bool preserve) {
     m_cols = new_cols;
 }
 
-Matrix Matrix::slice(st row_start, st row_end, st col_start, st col_end) const {
+Matrix Matrix::slice(const st row_start, const st row_end, const st col_start, const st col_end) const {
     assert(row_end > row_start && row_end <= m_rows);
     assert(col_end > col_start && col_end <= m_cols);
 
-    st new_rows = row_end - row_start;
-    st new_cols = col_end - col_start;
+    const st new_rows = row_end - row_start, new_cols = col_end - col_start;
     Matrix result(new_rows, new_cols);
 
     for (st i = 0; i < new_rows; ++i)

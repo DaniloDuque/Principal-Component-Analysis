@@ -9,7 +9,7 @@ int main() {
         {6, 7, 8}
     };
 
-    const SVD svd = SVD(m);
+    const auto svd = SVD(m);
     m.print();
     return 0;
 }

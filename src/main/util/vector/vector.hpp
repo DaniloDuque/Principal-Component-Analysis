@@ -6,8 +6,8 @@ class vector : public std::vector<double> {
 public:
     using std::vector<double>::vector;
 
-    double norm() const;
-    double dot(const vector& other) const;
+    [[nodiscard]] double norm() const;
+    [[nodiscard]] double dot(const vector& other) const;
 
     vector static zeros(st size);
     vector operator*(double scalar) const;
