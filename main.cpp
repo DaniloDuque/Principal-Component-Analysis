@@ -1,6 +1,7 @@
+#include "src/main/matrix/Matrix.hpp"
+#include "src/main/eigen/qr/QR.h"
 #include <iostream>
-#include "src/main/svd/SVD.hpp"
-#include "src/main/util/matrix/matrix.hpp"
+#include <cassert>
 
 int main() {
 
@@ -11,8 +12,20 @@ int main() {
         {123, 0.1, 3, 3, 3.14159265359}
     };
 
-    const auto svd = SVD(m);
-    std :: cout << std::endl;
-    m.print();
+    const QR qr(m);
+
+    puts("First test Q orthogonality");
+    const Matrix q = qr.getQ();
+    assert(q.is_orthogonal());
+
+    puts("Second test R upper triangular");
+    const Matrix r = qr.getR();
+    r.print();
+    assert(r.is_upper_triangular());
+
+    puts("Third test Q*R = A");
+    assert(qr.verify(m));
+    (q * r).print();
+
     return 0;
 }

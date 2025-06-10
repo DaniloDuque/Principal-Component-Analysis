@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(SVD_Image_Compressor)
+project(PCA_Image_Compressor)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -8,12 +8,17 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
         src/*.cpp
 )
 
-add_library(SVDLib ${SOURCES})
-target_include_directories(SVDLib PUBLIC src)
+add_library(PCALib ${SOURCES})
+target_include_directories(PCALib PUBLIC src)
 
 # ========== Main Executable ==========
-add_executable(SVD_Image_Compressor main.cpp)
-target_link_libraries(SVD_Image_Compressor PRIVATE SVDLib)
+add_executable(PCA_Image_Compressor main.cpp
+        src/main/pca/pca.cpp
+        src/main/pca/pca.h
+        src/main/eigen/qr/qr.cpp
+        src/main/eigen/qr/qr.h
+        src/main/eigen/qr_iteration.cpp)
+target_link_libraries(PCA_Image_Compressor PRIVATE PCALib)
 
 # ========== GoogleTest ==========
 include(FetchContent)
@@ -28,13 +33,13 @@ enable_testing()
 # ========== Test Executable ==========
 file(GLOB_RECURSE TEST_SOURCES CONFIGURE_DEPENDS test/*.cpp)
 
-add_executable(SVD_Tests ${TEST_SOURCES}
-        test/main/util/vector/test_vector.cpp)
-target_link_libraries(SVD_Tests
+add_executable(PCA_Image_Compressor_Tests ${TEST_SOURCES}
+        test/main/vector/test_vector.cpp)
+target_link_libraries(PCA_Image_Compressor_Tests
         PRIVATE
         GTest::gtest_main
-        SVDLib
+        PCALib
 )
 
 include(GoogleTest)
-gtest_discover_tests(SVD_Tests)
+gtest_discover_tests(PCA_Image_Compressor_Tests)

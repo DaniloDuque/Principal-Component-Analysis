@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "main/util/matrix/matrix.hpp"
+#include "main/matrix/Matrix.hpp"
 
 TEST(MatrixTest, Construction) {
     const Matrix m(2, 2, 1.0);

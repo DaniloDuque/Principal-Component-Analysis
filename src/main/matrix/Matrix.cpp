@@ -1,13 +1,12 @@
-#include "matrix.hpp"
+#include "Matrix.hpp"
 #include <iostream>
 #include <iomanip>
 #include <cmath>
 #include <cassert>
-#include <float.h>
 
 Matrix::Matrix(const st rows, const st cols, const double init_val): m_rows(rows), m_cols(cols), m_data(rows * cols, init_val) {}
 
-Matrix::Matrix(const st rows, const st cols, const vector& init): m_rows(rows), m_cols(cols) {
+Matrix::Matrix(const st rows, const st cols, const Vector& init): m_rows(rows), m_cols(cols) {
     assert(init.size() == m_rows * m_cols);
     m_data = init;
 }
@@ -20,7 +19,7 @@ void Matrix::clean_values_close_to_zero() {
                 (*this)(i, j) = 0.0;
 }
 
-Matrix::Matrix(const std::initializer_list<vector> init) {
+Matrix::Matrix(const std::initializer_list<Vector> init) {
     m_rows = init.size();
     m_cols = init.begin()->size();
     m_data.reserve(m_rows * m_cols);
@@ -34,16 +33,16 @@ Matrix::Matrix(const std::initializer_list<vector> init) {
 st Matrix::rows() const { return m_rows; }
 st Matrix::cols() const { return m_cols; }
 
-vector Matrix::row(const st i) const {
+Vector Matrix::row(const st i) const {
     assert(i < m_rows);
     auto begin = m_data.begin() + static_cast<std::ptrdiff_t>(i * m_cols);
     auto end = begin + static_cast<std::ptrdiff_t>(m_cols);
     return {begin, end};
 }
 
-vector Matrix::col(const st j) const {
+Vector Matrix::col(const st j) const {
     assert(j < m_cols);
-    vector result(m_rows);
+    Vector result(m_rows);
     for (st i = 0; i < m_rows; ++i)
         result[i] = (*this)(i, j);
     return result;
@@ -78,7 +77,7 @@ Matrix Matrix::operator*(const Matrix& other) const {
     const Matrix other_transposed = other.transpose();
 
     for (st i = 0; i < m_rows; ++i) {
-        vector row_i = row(i);
+        Vector row_i = row(i);
         for (st j = 0; j < other.m_cols; ++j)
             result(i, j) = row_i.dot(other_transposed.row(j));
     }
@@ -86,9 +85,9 @@ Matrix Matrix::operator*(const Matrix& other) const {
     return result;
 }
 
-vector Matrix::operator*(const vector& vec) const {
+Vector Matrix::operator*(const Vector& vec) const {
     assert(m_cols == vec.size());
-    vector result(m_rows);
+    Vector result(m_rows);
 
     for (st i = 0; i < m_rows; ++i) {
         double sum = 0.0;
@@ -156,7 +155,7 @@ void Matrix::print(const int precision) const {
 }
 
 void Matrix::resize(const st new_rows, const st new_cols, const bool preserve) {
-    vector new_data(new_rows * new_cols, 0.0);
+    Vector new_data(new_rows * new_cols, 0.0);
 
     if (preserve) {
         const st min_rows = std::min(new_rows, m_rows);
@@ -188,31 +187,33 @@ Matrix Matrix::slice(const st row_start, const st row_end, const st col_start, c
 bool Matrix::is_identity() const {
     for (st i = 0; i < m_rows; ++i)
         for (st j = 0; j < m_cols; ++j) {
-            if (i != j && (*this)(i, j) != 0.0) return false;
-            if (i == j && abs((*this)(i, j)-1.0) > EPSILON) return false;
-        }
-    return true;
-}
-
-bool Matrix::is_diagonal() const {
-    for (st i = 0; i < m_rows; ++i)
-        for (st j = 0; j < m_cols; ++j)
-            if (i != j && (*this)(i, j) != 0.0)
-                return false;
-    return true;
-}
-
-bool Matrix::is_bidiagonal() const {
-    for (st i = 0; i < m_rows; ++i)
-        for (st j = 0; j < m_cols; ++j) {
-            if (i == j || i == j-1) continue;
-            if (abs((*this)(i, j)) > EPSILON)
-                return false;
+            if (i == j && abs((*this)(i, j) - 1.0) > EPSILON) return false;
+            if (i != j && abs((*this)(i, j)) > EPSILON) return false;
         }
     return true;
 }
 
 bool Matrix::is_orthogonal() const {
-    const auto mt = this->transpose();
-    return (*this * mt).is_identity();
+    return (*this * this->transpose()).is_identity();
+}
+
+bool Matrix::is_upper_triangular() const {
+    for (st i = 1; i < m_rows; ++i)
+        for (st j = 0; j < std::min(i, m_cols); ++j)
+            if (std::abs((*this)(i, j)) > EPSILON)
+                return false;
+    return true;
+}
+
+void Matrix::center_data() {
+    for (st j = 0; j < m_cols; ++j) {
+        const auto mean = this->row(j).mean();
+        for (st i = 0; i < m_rows; ++i) (*this)(i, j) -= mean;
+    }
+}
+
+Matrix Matrix::covariance_matrix() const {
+    Matrix c = this->copy();
+    c.center_data();
+    return c.transpose() * c * (1.0 / (static_cast<double>(m_rows) - 1));
 }
