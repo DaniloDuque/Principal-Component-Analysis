@@ -21,12 +21,14 @@ public:
     [[nodiscard]] Matrix transpose() const;
     Matrix operator*(const Matrix& other) const;
     Matrix operator*(double scalar) const;
-    vector operator*(const vector& vec) const;
     Matrix operator+(const Matrix& other) const;
     Matrix operator-(const Matrix& other) const;
+    Matrix& operator=(const Matrix& other);
+    vector operator*(const vector& vec) const;
 
     void print(int precision = 3) const;
     void resize(st new_rows, st new_cols, bool preserve);
+    void clean_values_close_to_zero();
     [[nodiscard]] Matrix slice(st row_start, st row_end, st col_start, st col_end) const;
 
     [[nodiscard]] double frobenius_norm() const;
@@ -34,7 +36,13 @@ public:
     static Matrix identity(st n);
     static Matrix zeros(st rows, st cols);
 
+    [[nodiscard]] bool is_identity() const;
+    [[nodiscard]] bool is_orthogonal() const;
+    [[nodiscard]] bool is_diagonal() const;
+    [[nodiscard]] bool is_bidiagonal() const;
+
 private:
     st m_rows, m_cols;
     vector m_data;
+    const double EPSILON = 1e-10;
 };

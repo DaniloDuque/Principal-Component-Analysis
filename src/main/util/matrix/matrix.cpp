@@ -3,12 +3,21 @@
 #include <iomanip>
 #include <cmath>
 #include <cassert>
+#include <float.h>
 
 Matrix::Matrix(const st rows, const st cols, const double init_val): m_rows(rows), m_cols(cols), m_data(rows * cols, init_val) {}
 
 Matrix::Matrix(const st rows, const st cols, const vector& init): m_rows(rows), m_cols(cols) {
     assert(init.size() == m_rows * m_cols);
     m_data = init;
+}
+
+void Matrix::clean_values_close_to_zero() {
+    const st rows = m_rows, cols = m_cols;
+    for (st i = 0; i < rows; ++i)
+        for (st j = 0; j < cols; ++j)
+            if (abs((*this)(i, j)) < EPSILON)
+                (*this)(i, j) = 0.0;
 }
 
 Matrix::Matrix(const std::initializer_list<vector> init) {
@@ -91,7 +100,7 @@ vector Matrix::operator*(const vector& vec) const {
     return result;
 }
 
-Matrix Matrix::operator*(double scalar) const {
+Matrix Matrix::operator*(const double scalar) const {
     Matrix result(m_rows, m_cols);
     result.m_data = m_data * scalar;
     return result;
@@ -109,6 +118,15 @@ Matrix Matrix::operator-(const Matrix& other) const {
     Matrix result(m_rows, m_cols);
     result.m_data = m_data - other.m_data;
     return result;
+}
+
+Matrix& Matrix::operator=(const Matrix& other) {
+    if (this != &other) {
+        m_rows = other.m_rows;
+        m_cols = other.m_cols;
+        m_data = other.m_data;
+    }
+    return *this;
 }
 
 Matrix Matrix::identity(const st n) {
@@ -165,4 +183,36 @@ Matrix Matrix::slice(const st row_start, const st row_end, const st col_start, c
             result(i, j) = (*this)(row_start + i, col_start + j);
 
     return result;
+}
+
+bool Matrix::is_identity() const {
+    for (st i = 0; i < m_rows; ++i)
+        for (st j = 0; j < m_cols; ++j) {
+            if (i != j && (*this)(i, j) != 0.0) return false;
+            if (i == j && abs((*this)(i, j)-1.0) > EPSILON) return false;
+        }
+    return true;
+}
+
+bool Matrix::is_diagonal() const {
+    for (st i = 0; i < m_rows; ++i)
+        for (st j = 0; j < m_cols; ++j)
+            if (i != j && (*this)(i, j) != 0.0)
+                return false;
+    return true;
+}
+
+bool Matrix::is_bidiagonal() const {
+    for (st i = 0; i < m_rows; ++i)
+        for (st j = 0; j < m_cols; ++j) {
+            if (i == j || i == j-1) continue;
+            if (abs((*this)(i, j)) > EPSILON)
+                return false;
+        }
+    return true;
+}
+
+bool Matrix::is_orthogonal() const {
+    const auto mt = this->transpose();
+    return (*this * mt).is_identity();
 }

@@ -1,6 +1,7 @@
 #include "SVD.hpp"
 #include "../util/util.hpp"
 #include <cmath>
+#include <cassert>
 
 SVD::SVD(const Matrix& input) : A(input),
                                 U(Matrix::identity(input.rows())),
@@ -16,13 +17,6 @@ Matrix SVD::getU() const { return U; }
 Matrix SVD::getVt() const { return Vt; }
 
 Matrix SVD::getSigma() const { return Sigma; }
-
-void SVD::setEpsValuesToZero(Matrix &M, const double eps = 1e-10) {
-    const st rows = M.rows(), cols = M.cols();
-    for (st i = 0; i < rows; ++i)
-        for (st j = 0; j < cols; ++j)
-            if (abs(M(i, j)) < eps) M(i, j) = 0.0;
-}
 
 Matrix SVD::Householder(const vector &x, const st start) {
     const st n = x.size() - start;
@@ -51,17 +45,20 @@ void SVD::bidiagonalize() {
         Matrix P = Householder(colVec, i);
         A = P * A;
         U = U * P.transpose();
-        setEpsValuesToZero(A);
+        A.clean_values_close_to_zero();
         if (i < col - 2) {
             vector rowVec(col);
             for (st k = 0; k < col; ++k) rowVec[k] = A(i, k);
             Matrix Q = Householder(rowVec, i + 1);
             A = A * Q;
             Vt = Q.transpose() * Vt;
-            setEpsValuesToZero(A);
+            A.clean_values_close_to_zero();
         }
     }
     B = A;
+    B.print();
+    B.clean_values_close_to_zero();
+    assert(B.is_bidiagonal());
 }
 
 void SVD::applyGivensRotation(Matrix& M, const st i, const st j, const double c, const double s, const bool left) {
@@ -84,5 +81,7 @@ void SVD::diagonalizeBidiagonal() {
 }
 
 Matrix SVD::lowRankApprox(const st k) const {
-    return U.slice(0, U.rows(), 0, k) * Sigma.slice(0, k, 0, k) * Vt.slice(0, k, 0, Vt.cols());
+    return U.slice(0, U.rows(), 0, k) *
+           Sigma.slice(0, k, 0, k) *
+           Vt.slice(0, k, 0, Vt.cols());
 }
