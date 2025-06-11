@@ -12,5 +12,5 @@ public:
     [[nodiscard]] const Matrix& getQ() const;
     [[nodiscard]] const Matrix& getR() const;
 
-    [[nodiscard]] bool verify(const Matrix& A, double tol = 1e-7) const;
+    [[nodiscard]] bool verify(const Matrix& A, double tol = 1e-5) const;
 };

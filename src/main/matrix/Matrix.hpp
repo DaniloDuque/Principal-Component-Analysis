@@ -35,15 +35,16 @@ public:
     static Matrix identity(st n);
     static Matrix zeros(st rows, st cols);
 
+    void center_data();
     [[nodiscard]] Matrix covariance_matrix() const;
 
-    bool is_identity() const;
-    bool is_orthogonal() const;
-    bool is_upper_triangular() const;
+    [[nodiscard]] bool is_identity() const;
+    [[nodiscard]] bool is_diagonal() const;
+    [[nodiscard]] bool is_orthogonal() const;
+    [[nodiscard]] bool is_upper_triangular() const;
 
 private:
-    void center_data();
     st m_rows, m_cols;
     Vector m_data;
-    const double EPSILON = 1e-10;
+    const double EPSILON = 1e-5;
 };

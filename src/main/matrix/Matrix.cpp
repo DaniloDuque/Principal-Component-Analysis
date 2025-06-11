@@ -184,6 +184,13 @@ Matrix Matrix::slice(const st row_start, const st row_end, const st col_start, c
     return result;
 }
 
+bool Matrix::is_diagonal() const {
+    for (st i = 0; i < m_rows; ++i)
+        for (st j = 0; j < m_cols; ++j)
+            if (i != j && abs((*this)(i, j)) > EPSILON) return false;
+    return true;
+}
+
 bool Matrix::is_identity() const {
     for (st i = 0; i < m_rows; ++i)
         for (st j = 0; j < m_cols; ++j) {
@@ -207,13 +214,12 @@ bool Matrix::is_upper_triangular() const {
 
 void Matrix::center_data() {
     for (st j = 0; j < m_cols; ++j) {
-        const auto mean = this->row(j).mean();
+        const auto mean = this->col(j).mean();
         for (st i = 0; i < m_rows; ++i) (*this)(i, j) -= mean;
     }
 }
 
 Matrix Matrix::covariance_matrix() const {
-    Matrix c = this->copy();
-    c.center_data();
+    const Matrix c = this->copy();
     return c.transpose() * c * (1.0 / (static_cast<double>(m_rows) - 1));
 }

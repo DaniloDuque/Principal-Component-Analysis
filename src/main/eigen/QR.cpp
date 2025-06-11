@@ -5,28 +5,27 @@
 #include <cmath>
 #include <utility>
 
-
 std::pair<Matrix, Matrix> QR::qr_householder(const Matrix& input) {
     Matrix A = input;
     const st m = A.rows();
     const st n = A.cols();
     Matrix Q = Matrix::identity(m);
 
-    for (int k = 0; k < std::min(m, n); ++k) {
+    for (st k = 0; k < std::min(m, n); ++k) {
         Vector x(m - k);
-        for (int i = k; i < m; ++i) x[i - k] = A(i, k);
+        for (st i = k; i < m; ++i) x[i - k] = A(i, k);
 
         const double alpha = -std::copysign(x.norm(), x[0]);
         Vector e1 = Vector::zeros(m - k); e1[0] = 1.0;
         Vector v = (x - e1 * alpha).normalize();
 
-        for (int j = k; j < n; ++j) {
+        for (st j = k; j < n; ++j) {
             double dot = 0.0;
             for (int i = 0; i < v.size(); ++i) dot += v[i] * A(k + i, j);
             for (int i = 0; i < v.size(); ++i) A(k + i, j) -= 2 * v[i] * dot;
         }
 
-        for (int j = 0; j < m; ++j) {
+        for (st j = 0; j < m; ++j) {
             double dot = 0.0;
             for (int i = 0; i < v.size(); ++i) dot += v[i] * Q(j, k + i);
             for (int i = 0; i < v.size(); ++i) Q(j, k + i) -= 2 * dot * v[i];

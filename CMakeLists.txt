@@ -15,9 +15,8 @@ target_include_directories(PCALib PUBLIC src)
 add_executable(PCA_Image_Compressor main.cpp
         src/main/pca/pca.cpp
         src/main/pca/pca.h
-        src/main/eigen/qr/qr.cpp
-        src/main/eigen/qr/qr.h
-        src/main/eigen/qr_iteration.cpp)
+        src/main/eigen/QR.cpp
+        src/main/eigen/QR.h)
 target_link_libraries(PCA_Image_Compressor PRIVATE PCALib)
 
 # ========== GoogleTest ==========
@@ -34,7 +33,9 @@ enable_testing()
 file(GLOB_RECURSE TEST_SOURCES CONFIGURE_DEPENDS test/*.cpp)
 
 add_executable(PCA_Image_Compressor_Tests ${TEST_SOURCES}
-        test/main/vector/test_vector.cpp)
+        test/main/vector/test_vector.cpp
+        test/main/matrix/test_Matrix.cpp
+        test/main/eigen/test_QR.cpp)
 target_link_libraries(PCA_Image_Compressor_Tests
         PRIVATE
         GTest::gtest_main
