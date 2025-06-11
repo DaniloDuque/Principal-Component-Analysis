@@ -33,25 +33,43 @@ Matrix::Matrix(const std::initializer_list<Vector> init) {
 st Matrix::rows() const { return m_rows; }
 st Matrix::cols() const { return m_cols; }
 
-Vector Matrix::row(const st i) const {
-    assert(i < m_rows);
-    auto begin = m_data.begin() + static_cast<std::ptrdiff_t>(i * m_cols);
-    auto end = begin + static_cast<std::ptrdiff_t>(m_cols);
+Vector Matrix::row(const st i, const st start) const {
+    assert(i < m_rows && start <= m_cols);
+    auto begin = m_data.begin() + static_cast<std::ptrdiff_t>(i * m_cols + start);
+    auto end = m_data.begin() + static_cast<std::ptrdiff_t>(i * m_cols + m_cols);
     return {begin, end};
 }
 
-Vector Matrix::col(const st j) const {
+void Matrix::set_row(const st i, const Vector& row, const st start) {
+    assert(i < m_rows);
+    assert(start <= m_cols);
+    assert(row.size() <= m_cols - start);
+    std::ranges::copy(row, m_data.begin() + static_cast<std::ptrdiff_t>(i * m_cols + start));
+}
+
+Vector Matrix::col(const st j, const st start) const {
     assert(j < m_cols);
-    Vector result(m_rows);
-    for (st i = 0; i < m_rows; ++i)
-        result[i] = (*this)(i, j);
+    assert(start <= m_rows);
+    Vector result;
+    result.reserve(m_rows - start);
+    for (st i = start; i < m_rows; ++i)
+        result.push_back((*this)(i, j));
     return result;
+}
+
+void Matrix::set_col(const st j, const Vector& col, const st start) {
+    assert(j < m_cols);
+    assert(start <= m_rows);
+    assert(col.size() <= m_rows - start);
+    for (st i = 0; i < col.size(); ++i)
+        (*this)(start + i, j) = col[i];
 }
 
 double& Matrix::operator()(const st i, const st j) {
     assert(i < m_rows && j < m_cols);
     return m_data[i * m_cols + j];
 }
+
 double Matrix::operator()(const st i, const st j) const {
     assert(i < m_rows && j < m_cols);
     return m_data[i * m_cols + j];
@@ -222,4 +240,19 @@ void Matrix::center_data() {
 Matrix Matrix::covariance_matrix() const {
     const Matrix c = this->copy();
     return c.transpose() * c * (1.0 / (static_cast<double>(m_rows) - 1));
+}
+
+Vector Matrix::column_means() const {
+    Vector means(m_cols);
+    for (st j = 0; j < m_cols; ++j) means[j] = this->col(j).mean();
+    return means;
+}
+
+void Matrix::add_mean(const Vector& column_means) {
+    assert(column_means.size() == m_cols);
+    for (st i = 0; i < m_rows; ++i) {
+        for (st j = 0; j < m_cols; ++j) {
+            (*this)(i, j) += column_means[j];
+        }
+    }
 }

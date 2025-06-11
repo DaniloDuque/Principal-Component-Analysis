@@ -44,8 +44,10 @@ Vector Vector::operator-(const Vector& other) const {
 }
 
 Vector Vector::normalize() const {
-    const Vector v(*this);
-    return v * (1.0 / v.norm());
+    Vector v(*this);
+    const double norm = v.norm();
+    if (norm == 0.0) return v;
+    return v * (1.0 / norm);
 }
 
 void Vector::reserve(const st size) {

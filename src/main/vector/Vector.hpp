@@ -14,7 +14,7 @@ public:
     Vector operator*(double scalar) const;
     Vector operator+(const Vector& other) const;
     Vector operator-(const Vector& other) const;
-    Vector normalize() const;
+    [[nodiscard]] Vector normalize() const;
 
     void reserve(st size);
 };

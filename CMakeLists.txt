@@ -3,21 +3,36 @@ project(PCA_Image_Compressor)
 
 set(CMAKE_CXX_STANDARD 20)
 
+# ========== OpenCV ==========
+find_package(OpenCV REQUIRED)
+
 # ========== Source Files ==========
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
         src/*.cpp
 )
 
 add_library(PCALib ${SOURCES})
-target_include_directories(PCALib PUBLIC src)
+target_include_directories(PCALib
+        PUBLIC src
+        PRIVATE ${OpenCV_INCLUDE_DIRS}  # <-- Fixes red highlight in CLion
+)
+target_link_libraries(PCALib PUBLIC ${OpenCV_LIBS})
 
 # ========== Main Executable ==========
-add_executable(PCA_Image_Compressor main.cpp
+add_executable(PCA_Image_Compressor
+        main.cpp
         src/main/pca/pca.cpp
         src/main/pca/pca.h
         src/main/eigen/QR.cpp
-        src/main/eigen/QR.h)
-target_link_libraries(PCA_Image_Compressor PRIVATE PCALib)
+        src/main/eigen/QR.h
+        src/main/image/ImageIO.cpp
+        src/main/image/ImageIO.h
+        src/main/ImageCompressor.cpp
+        src/main/ImageCompressor.h
+)
+
+target_include_directories(PCA_Image_Compressor PRIVATE ${OpenCV_INCLUDE_DIRS})
+target_link_libraries(PCA_Image_Compressor PRIVATE PCALib ${OpenCV_LIBS})
 
 # ========== GoogleTest ==========
 include(FetchContent)
@@ -32,14 +47,19 @@ enable_testing()
 # ========== Test Executable ==========
 file(GLOB_RECURSE TEST_SOURCES CONFIGURE_DEPENDS test/*.cpp)
 
-add_executable(PCA_Image_Compressor_Tests ${TEST_SOURCES}
+add_executable(PCA_Image_Compressor_Tests
+        ${TEST_SOURCES}
         test/main/vector/test_vector.cpp
         test/main/matrix/test_Matrix.cpp
-        test/main/eigen/test_QR.cpp)
+        test/main/eigen/test_QR.cpp
+)
+
+target_include_directories(PCA_Image_Compressor_Tests PRIVATE ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(PCA_Image_Compressor_Tests
         PRIVATE
         GTest::gtest_main
         PCALib
+        ${OpenCV_LIBS}
 )
 
 include(GoogleTest)
