@@ -8,6 +8,7 @@ public:
     Matrix(st rows, st cols, double init_val = 0.0);
     Matrix(st rows, st cols, const Vector& init);
     Matrix(std::initializer_list<Vector> init);
+    Matrix() = default;
 
     [[nodiscard]] st rows() const;
     [[nodiscard]] st cols() const;
@@ -37,6 +38,7 @@ public:
     static Matrix identity(st n);
     static Matrix zeros(st rows, st cols);
 
+    void normalize();
     void center_data();
     void add_mean(Vector const& column_means);
     [[nodiscard]] Vector column_means() const;
@@ -48,7 +50,7 @@ public:
     [[nodiscard]] bool is_upper_triangular() const;
 
 private:
-    st m_rows, m_cols;
+    st m_rows{}, m_cols{};
     Vector m_data;
     const double EPSILON = 1e-5;
 };

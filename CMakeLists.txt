@@ -27,8 +27,9 @@ add_executable(PCA_Image_Compressor
         src/main/eigen/QR.h
         src/main/image/ImageIO.cpp
         src/main/image/ImageIO.h
-        src/main/ImageCompressor.cpp
-        src/main/ImageCompressor.h
+        src/main/ImageCompressor/ImageCompressor.cpp
+        src/main/ImageCompressor/ImageCompressor.h
+        src/main/matrix/CompressedMatrix.h
 )
 
 target_include_directories(PCA_Image_Compressor PRIVATE ${OpenCV_INCLUDE_DIRS})

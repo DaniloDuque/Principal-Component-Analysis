@@ -92,14 +92,14 @@ Matrix Matrix::transpose() const {
 Matrix Matrix::operator*(const Matrix& other) const {
     assert(m_cols == other.m_rows);
     Matrix result(m_rows, other.m_cols);
-    const Matrix other_transposed = other.transpose();
 
-    for (st i = 0; i < m_rows; ++i) {
-        Vector row_i = row(i);
-        for (st j = 0; j < other.m_cols; ++j)
-            result(i, j) = row_i.dot(other_transposed.row(j));
-    }
-
+    for (st i = 0; i < m_rows; ++i)
+        for (st j = 0; j < other.m_cols; ++j) {
+            double sum = 0.0;
+            for (st k = 0; k < m_cols; ++k)
+                sum += (*this)(i, k) * other(k, j);
+            result(i, j) = sum;
+        }
     return result;
 }
 
@@ -155,6 +155,10 @@ Matrix Matrix::identity(const st n) {
 Matrix Matrix::zeros(const st rows, const st cols) {
     Matrix Z(rows, cols);
     return Z;
+}
+
+void Matrix::normalize() {
+    *this = *this * (1.0 / this->frobenius_norm());
 }
 
 double Matrix::frobenius_norm() const {
