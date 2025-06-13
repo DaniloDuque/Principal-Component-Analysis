@@ -27,37 +27,5 @@ Given a data matrix $X \in \mathbb{R}^{n \times d}$, where each row is a $d$-dim
 5. Optionally, restore the column means to the reduced data for interpretation.
 
 By performing these steps, the resulting low-dimensional representation $Y$ captures the majority of the variance in the original data.
-
----
-
-## Mathematical Components
-
-* **Covariance Matrix Computation**
-
-  $C = \frac{1}{n - 1} X^\top X$
-
-* **Power Iteration Algorithm**
-
-  An iterative method for approximating the dominant eigenvectors of $C$ via orthogonal deflation.
-
-* **Low-Rank Approximation**
-
-  Constructed via:
-
-  $A \approx Y V_k^\top + \mu$
-
-* **Frobenius Norm**
-
-  Used to measure approximation error:
-
-```math
-\|A - \tilde{A}\|_F = \left( \sum_{i,j} (A_{ij} - \tilde{A}_{ij})^2 \right)^{\frac{1}{2}}
-```
-
----
-
-## Future Extensions
-
-* Generalized SVD-based PCA
   
 ---
