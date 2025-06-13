@@ -6,19 +6,6 @@
 
 Matrix::Matrix(const st rows, const st cols, const double init_val): m_rows(rows), m_cols(cols), m_data(rows * cols, init_val) {}
 
-Matrix::Matrix(const st rows, const st cols, const Vector& init): m_rows(rows), m_cols(cols) {
-    assert(init.size() == m_rows * m_cols);
-    m_data = init;
-}
-
-void Matrix::clean_values_close_to_zero() {
-    const st rows = m_rows, cols = m_cols;
-    for (st i = 0; i < rows; ++i)
-        for (st j = 0; j < cols; ++j)
-            if (abs((*this)(i, j)) < EPSILON)
-                (*this)(i, j) = 0.0;
-}
-
 Matrix::Matrix(const std::initializer_list<Vector> init) {
     m_rows = init.size();
     m_cols = init.begin()->size();
@@ -157,10 +144,6 @@ Matrix Matrix::zeros(const st rows, const st cols) {
     return Z;
 }
 
-void Matrix::normalize() {
-    *this = *this * (1.0 / this->frobenius_norm());
-}
-
 double Matrix::frobenius_norm() const {
     double sum = 0.0;
     for(const auto &i : m_data) sum += i*i;
@@ -174,64 +157,6 @@ void Matrix::print(const int precision) const {
             std::cout << (*this)(i, j) << " ";
         std::cout << "\n";
     }
-}
-
-void Matrix::resize(const st new_rows, const st new_cols, const bool preserve) {
-    Vector new_data(new_rows * new_cols, 0.0);
-
-    if (preserve) {
-        const st min_rows = std::min(new_rows, m_rows);
-        const st min_cols = std::min(new_cols, m_cols);
-        for (st i = 0; i < min_rows; ++i)
-            for (st j = 0; j < min_cols; ++j)
-                new_data[i * new_cols + j] = (*this)(i, j);
-    }
-
-    m_data = std::move(new_data);
-    m_rows = new_rows;
-    m_cols = new_cols;
-}
-
-Matrix Matrix::slice(const st row_start, const st row_end, const st col_start, const st col_end) const {
-    assert(row_end > row_start && row_end <= m_rows);
-    assert(col_end > col_start && col_end <= m_cols);
-
-    const st new_rows = row_end - row_start, new_cols = col_end - col_start;
-    Matrix result(new_rows, new_cols);
-
-    for (st i = 0; i < new_rows; ++i)
-        for (st j = 0; j < new_cols; ++j)
-            result(i, j) = (*this)(row_start + i, col_start + j);
-
-    return result;
-}
-
-bool Matrix::is_diagonal() const {
-    for (st i = 0; i < m_rows; ++i)
-        for (st j = 0; j < m_cols; ++j)
-            if (i != j && abs((*this)(i, j)) > EPSILON) return false;
-    return true;
-}
-
-bool Matrix::is_identity() const {
-    for (st i = 0; i < m_rows; ++i)
-        for (st j = 0; j < m_cols; ++j) {
-            if (i == j && abs((*this)(i, j) - 1.0) > EPSILON) return false;
-            if (i != j && abs((*this)(i, j)) > EPSILON) return false;
-        }
-    return true;
-}
-
-bool Matrix::is_orthogonal() const {
-    return (*this * this->transpose()).is_identity();
-}
-
-bool Matrix::is_upper_triangular() const {
-    for (st i = 1; i < m_rows; ++i)
-        for (st j = 0; j < std::min(i, m_cols); ++j)
-            if (std::abs((*this)(i, j)) > EPSILON)
-                return false;
-    return true;
 }
 
 void Matrix::center_data() {

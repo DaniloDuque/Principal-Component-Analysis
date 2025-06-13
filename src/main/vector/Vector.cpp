@@ -4,8 +4,6 @@
 #include <cmath>
 #include <random>
 
-Vector Vector::zeros(const st size) { return Vector(size, 0.0); }
-
 double Vector::norm() const {
     double result = 0.0;
     for (const auto& i : *this) result += i * i;
@@ -22,6 +20,14 @@ double Vector::dot(const Vector& other) const {
     double result = 0.0;
     for (st i = 0; i < size(); ++i) result += (*this)[i] * other[i];
     return result;
+}
+
+Vector Vector::random_unit(const st size) {
+    thread_local std::mt19937 gen(std::random_device{}());
+    std::normal_distribution dist(0.0, 1.0);
+    Vector v(size);
+    for (st i = 0; i < size; ++i) v[i] = dist(gen);
+    return v.normalize();
 }
 
 Vector Vector::operator*(const double scalar) const {
@@ -53,14 +59,6 @@ Vector Vector::normalize() const {
 
 void Vector::normalize_this() {
     *this = this->normalize();
-}
-
-Vector Vector::random_unit(const st size) {
-    thread_local std::mt19937 gen(std::random_device{}());
-    std::normal_distribution dist(0.0, 1.0);
-    Vector v(size);
-    for (st i = 0; i < size; ++i) v[i] = dist(gen);
-    return v.normalize();
 }
 
 void Vector::reserve(const st size) {

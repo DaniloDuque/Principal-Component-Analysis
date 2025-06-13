@@ -12,7 +12,6 @@ public:
 
     static Vector random_unit(st size);
 
-    Vector static zeros(st size);
     Vector operator*(double scalar) const;
     Vector operator+(const Vector& other) const;
     Vector operator-(const Vector& other) const;
