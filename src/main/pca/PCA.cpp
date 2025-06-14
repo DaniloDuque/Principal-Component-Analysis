@@ -6,7 +6,7 @@ using namespace std;
 constexpr double EPSILON = 1e-5;
 
 std::pair<Matrix, Matrix> PCA::power_iteration(const Matrix& X, const st k, const st num_iter) {
-    Matrix cov = X.covariance_matrix();
+    const Matrix cov = X.covariance_matrix();
     const st n = cov.rows();
     Matrix V_k(n, k);
 
@@ -22,23 +22,15 @@ std::pair<Matrix, Matrix> PCA::power_iteration(const Matrix& X, const st k, cons
             }
 
             v_new.normalize_this();
-            if ((v - v_new).norm() < EPSILON)
-                break;
+            if ((v - v_new).norm() < EPSILON) break;
             v = std::move(v_new);
         }
-
         V_k.set_col(eig, v);
-
-        Vector Av = cov * v;
-        for (st i = 0; i < n; ++i)
-            for (st j = 0; j < n; ++j)
-                cov(i, j) -= v[i] * Av[j];
     }
 
     Matrix Y = X * V_k;
     return {Y, V_k};
 }
-
 
 LowRankApproximation PCA::low_rank_approximation(const Matrix &A, const st k, const st num_iter) {
     Matrix X = A.copy();
@@ -48,6 +40,3 @@ LowRankApproximation PCA::low_rank_approximation(const Matrix &A, const st k, co
     auto [Y, V_k] = power_iteration(X, k, num_iter);
     return {Y, V_k, mean};
 }
-
-
-
